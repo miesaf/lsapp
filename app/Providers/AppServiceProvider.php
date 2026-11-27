@@ -2,31 +2,25 @@
 
 namespace App\Providers;
 
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
-
-//For migrating string
-use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         //
     }
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
-        //For migrating string
-        Schema::defaultStringLength(191);
+        // The views use Bootstrap, so render pagination links with its markup.
+        Paginator::useBootstrapFour();
     }
 }

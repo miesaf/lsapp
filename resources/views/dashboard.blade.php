@@ -27,11 +27,13 @@
                                     <td>{{$post->title}}</td>
                                     <td><a href="/posts/{{$post->id}}/edit" class="btn btn-primary">Edit</a></td>
                                     <td>
-                                        {!!Form::open(['action' => ['PostsController@destroy', $post->id], 'method' => 'POST', 'class' => 'float-right'])!!}
-                                            {{Form::hidden('_method', 'DELETE')}}
-                                            {{Form::submit('Delete', ['class' => 'btn btn-danger'])}}
-                                        {!!Form::close()!!}
+                                        <form method="POST" action="{{ route('posts.destroy', $post->id) }}" class="float-right">
+                                            @csrf
+                                            @method('DELETE')
+                                            <input type="submit" value="Delete" class="btn btn-danger">
+                                        </form>
                                     </td>
+                                </tr>
                             @endforeach
                         </table>
                     @else
