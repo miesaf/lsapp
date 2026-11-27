@@ -6,7 +6,7 @@
     <img src="/storage/cover_images/{{$post->cover_image}}" style="max-width:100%">
     <br/><br/>
     <div>
-        {!!$post->body!!}
+        {!! $post->safeBody() !!}
     </div>
     <hr/>
     <small>Written on {{$post->created_at}} by {{$post->user->name}}</small>

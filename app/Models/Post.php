@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PostHtml;
 use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,6 +25,12 @@ class Post extends Model
         return [
             'user_id' => 'integer',
         ];
+    }
+
+    /** The body as safe HTML for display (also cleans posts saved before bodies were sanitized). */
+    public function safeBody(): string
+    {
+        return PostHtml::clean($this->body);
     }
 
     public function user(): BelongsTo

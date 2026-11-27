@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Support\PostHtml;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -71,7 +72,7 @@ class PostsController extends Controller implements HasMiddleware
         // Create Post
         $post = new Post;
         $post->title = $request->input('title');
-        $post->body = $request->input('body');
+        $post->body = PostHtml::clean($request->input('body'));
         $post->user_id = auth()->user()->id;
         $post->cover_image = $fileNameToStore;
         $post->save();
@@ -139,7 +140,7 @@ class PostsController extends Controller implements HasMiddleware
         }
 
         $post->title = $request->input('title');
-        $post->body = $request->input('body');
+        $post->body = PostHtml::clean($request->input('body'));
         if($request->hasFile('cover_image')){
             $post->cover_image = $fileNameToStore;
         }
