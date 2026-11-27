@@ -15,10 +15,11 @@
         @if(Auth::user()->id == $post->user_id)
             <a href="/posts/{{$post->id}}/edit" class="btn btn-warning">Edit</a>
 
-            {!!Form::open(['action' => ['PostsController@destroy', $post->id], 'method' => 'POST', 'class' => 'float-right'])!!}
-                {{Form::hidden('_method', 'DELETE')}}
-                {{Form::submit('Delete', ['class' => 'btn btn-danger'])}}
-            {!!Form::close()!!}
+            <form method="POST" action="{{ route('posts.destroy', $post->id) }}" class="float-right">
+                @csrf
+                @method('DELETE')
+                <input type="submit" value="Delete" class="btn btn-danger">
+            </form>
         @endif
     @endif
 @endsection

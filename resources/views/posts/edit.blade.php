@@ -2,19 +2,20 @@
 
 @section('content')
     <h1>Edit Post</h1>
-    {!! Form::open(['action' => ['PostsController@update', $post->id], 'method' => 'POST', 'enctype' => 'multipart/form-data']) !!}
+    <form method="POST" action="{{ route('posts.update', $post->id) }}" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
         <div class="form-group">
-            {{Form::label('title', 'Title')}}
-            {{Form::text('title', $post->title, ['class' => 'form-control', 'placeholder' => 'Title'])}}
+            <label for="title">Title</label>
+            <input type="text" name="title" id="title" value="{{ old('title', $post->title) }}" class="form-control" placeholder="Title">
         </div>
         <div class="form-group">
-            {{Form::label('body', 'Body')}}
-            {{Form::textarea('body', $post->body, ['id' => 'article-ckeditor', 'class' => 'form-control', 'placeholder' => 'Body Text'])}}
+            <label for="article-ckeditor">Body</label>
+            <textarea name="body" id="article-ckeditor" class="form-control" placeholder="Body Text" rows="10" cols="50">{{ old('body', $post->body) }}</textarea>
         </div>
         <div class="form-group">
-            {{Form::file('cover_image', ['class' => 'form-control-file'])}}
+            <input type="file" name="cover_image" class="form-control-file">
         </div>
-        {{Form::hidden('_method', 'PUT')}}
-        {{Form::submit('Submit', ['class' => 'btn btn-primary'])}}
-    {!! Form::close() !!}
+        <input type="submit" value="Submit" class="btn btn-primary">
+    </form>
 @endsection
