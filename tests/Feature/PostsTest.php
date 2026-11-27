@@ -214,4 +214,50 @@ class PostsTest extends TestCase
         $this->assertModelMissing($post);
         Storage::disk('public')->assertMissing('cover_images/pic_1.jpg');
     }
+
+    private const ATTACK = '<p>Hi<script>alert(1)</script></p><img src=x onerror="alert(2)">'
+        . '<a href="javascript:alert(3)">click</a><iframe src="https://evil.test"></iframe>'
+        . '<p onclick="alert(4)" style="color:red">styled</p>';
+
+    private const FORMATTING = '<h2>Title</h2><p><strong>bold</strong> <i>it</i> <a href="https://example.com/x">link</a></p>'
+        . '<ul><li>one</li></ul><blockquote><p>quote</p></blockquote>'
+        . '<figure class="table"><table><tbody><tr><td colspan="2">cell</td></tr></tbody></table></figure>';
+
+    public function test_a_new_post_body_is_stored_without_anything_that_runs_script(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post('/posts', ['title' => 'Attack', 'body' => self::ATTACK . self::FORMATTING])->assertRedirect('/posts');
+
+        $body = Post::firstOrFail()->body;
+        foreach (['<script', 'onerror', 'onclick', 'javascript:', '<iframe', 'style='] as $bad) {
+            $this->assertStringNotContainsStringIgnoringCase($bad, $body);
+        }
+        foreach (['<h2>Title</h2>', '<strong>bold</strong>', '<i>it</i>', 'href="https://example.com/x"', '<li>one</li>', '<blockquote>', '<td colspan="2">cell</td>'] as $kept) {
+            $this->assertStringContainsString($kept, $body);
+        }
+    }
+
+    public function test_an_updated_post_body_is_cleaned_too(): void
+    {
+        $user = User::factory()->create();
+        $post = Post::factory()->for($user)->create();
+
+        $this->actingAs($user)->put("/posts/{$post->id}", ['title' => 'Edited', 'body' => self::ATTACK])->assertRedirect('/posts');
+
+        $this->assertStringNotContainsStringIgnoringCase('<script', $post->fresh()->body);
+        $this->assertStringNotContainsStringIgnoringCase('onerror', $post->fresh()->body);
+    }
+
+    public function test_a_post_saved_before_the_fix_is_shown_cleaned(): void
+    {
+        $post = Post::factory()->for(User::factory())->create(['body' => self::ATTACK . '<p><strong>kept</strong></p>']);
+
+        $html = $this->get("/posts/{$post->id}")->assertOk()->getContent();
+
+        foreach (['<script>alert(1)', 'onerror=', 'onclick=', 'javascript:alert', '<iframe'] as $bad) {
+            $this->assertStringNotContainsStringIgnoringCase($bad, $html);
+        }
+        $this->assertStringContainsString('<strong>kept</strong>', $html);
+    }
 }
